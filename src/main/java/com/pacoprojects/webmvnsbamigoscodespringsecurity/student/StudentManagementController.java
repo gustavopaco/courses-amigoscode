@@ -2,6 +2,7 @@ package com.pacoprojects.webmvnsbamigoscodespringsecurity.student;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,12 +19,15 @@ public class StudentManagementController {
         this.studentConfig = studentConfig;
     }
 
+    /* Pode usar valores como: hasRole('ROLE_') | hasAnyRole('ROLE_') | hasAuthority('permission') | hasAnyAuthority('permission') */
     @GetMapping
+    @PreAuthorize(value = "hasAnyRole('ROLE_ADMIN', 'ROLE_ADMIN_TRAINEE')")
     public List<Student> getAllStudents() {
         return studentConfig.getAllStudents();
     }
 
     @PostMapping
+    @PreAuthorize(value = "hasAuthority('student:write')")
     public ResponseEntity<?> registerNewStudent(@RequestBody Student student) {
 
         /* Percorre a lista de Students verificando se ID ou Username ja existem, se sim lanca exception se nao registra na lista*/
@@ -40,6 +44,7 @@ public class StudentManagementController {
     }
 
     @PutMapping
+    @PreAuthorize(value = "hasAuthority('student:write')")
     public void updateStudent(@RequestBody Student student) {
 
         /* Passa pela lista de Students, filtrando Student onde id == getStudentID(), se achar retorna o Student*/
@@ -62,6 +67,7 @@ public class StudentManagementController {
     }
 
     @DeleteMapping(path = "{id}")
+    @PreAuthorize(value = "hasAuthority('student:write')")
     public void deleteStudent(@PathVariable(name = "id") Integer id) {
 
         /* Passa pela lista e filtrando Student onde id == getStudentID(), se achar retorna o Student*/
