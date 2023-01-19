@@ -1,0 +1,76 @@
+package com.pacoprojects.webmvnsbamigoscodespringsecurity.student;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping(path = "management/api/v1/students")
+public class StudentManagementController {
+
+    private final StudentConfig studentConfig;
+
+    public StudentManagementController(StudentConfig studentConfig) {
+        this.studentConfig = studentConfig;
+    }
+
+    @GetMapping
+    public List<Student> getAllStudents() {
+        return studentConfig.getAllStudents();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> registerNewStudent(@RequestBody Student student) {
+        /* Percorre a lista de Students verificando se ID ou Username ja existem, se sim lanca exception se nao registra na lista*/
+        Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
+                .filter(student1 -> (student1.getStudentID().equals(student.getStudentID())) || student1.getStudentName().equals(student.getStudentName()))
+                .findFirst();
+        if (studentOptional.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exist");
+        } else {
+            studentConfig.getAllStudents().add(student);
+        }
+        System.out.println(student.toString());
+        return ResponseEntity.ok("New user registred");
+    }
+
+    @DeleteMapping(path = "{id}")
+    public void deleteStudent(@PathVariable(name = "id") Integer id) {
+
+        /* Passa pela lista e filtrando Student onde id == getStudentID(), se achar retorna o Student*/
+        Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
+                .filter(student -> student.getStudentID().equals(id))
+                .findFirst();
+
+        /* Se estudante existe na lista deleta, se nao lança exception*/
+        studentOptional.ifPresentOrElse(
+                studentConfig.getAllStudents()::remove,
+                () -> {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student does not exist");
+                }
+        );
+    }
+
+    @PutMapping
+    public void updateStudent(@RequestBody Student student) {
+
+        /* Passa pela lista e filtrando Student onde id == getStudentID(), se achar retorna o Student*/
+        Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
+                .filter(student1 -> student1.getStudentID().equals(student.getStudentID()))
+                .findFirst();
+
+        /* Se Student existe entao da um replace na lista no Index = getStudentFiltradoID e adiciona novo Student, se nao lanca exception*/
+        studentOptional.ifPresentOrElse(student1 -> {
+                    studentConfig.getAllStudents().remove(studentOptional.get());
+                    studentConfig.getAllStudents().add(student);
+                },
+                () -> {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student cant be updated because he does not exist");
+                }
+        );
+    }
+}

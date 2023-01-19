@@ -12,7 +12,10 @@ public enum ApplicationUserRole {
             ApplicationUserPermission.STUDENT_READ,
             ApplicationUserPermission.STUDENT_WRITE,
             ApplicationUserPermission.COURSE_READ,
-            ApplicationUserPermission.COURSE_WRITE));
+            ApplicationUserPermission.COURSE_WRITE)),
+    ADMIN_TRAINEE(Sets.newHashSet(
+            ApplicationUserPermission.STUDENT_READ,
+            ApplicationUserPermission.COURSE_READ));
 
     /* Mapeamento @OneToMany - Uma Role tem muitas permissoes*/
     private final Set<ApplicationUserPermission> permissions;
