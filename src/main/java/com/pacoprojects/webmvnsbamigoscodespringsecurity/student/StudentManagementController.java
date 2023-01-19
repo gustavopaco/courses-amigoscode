@@ -25,6 +25,7 @@ public class StudentManagementController {
 
     @PostMapping
     public ResponseEntity<?> registerNewStudent(@RequestBody Student student) {
+
         /* Percorre a lista de Students verificando se ID ou Username ja existem, se sim lanca exception se nao registra na lista*/
         Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
                 .filter(student1 -> (student1.getStudentID().equals(student.getStudentID())) || student1.getStudentName().equals(student.getStudentName()))
@@ -36,6 +37,28 @@ public class StudentManagementController {
         }
         System.out.println(student.toString());
         return ResponseEntity.ok("New user registred");
+    }
+
+    @PutMapping
+    public void updateStudent(@RequestBody Student student) {
+
+        /* Passa pela lista de Students, filtrando Student onde id == getStudentID(), se achar retorna o Student*/
+        Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
+                .filter(student1 -> student1.getStudentID().equals(student.getStudentID()))
+                .findFirst();
+
+        /* Se Student existe,
+        entao removemos Student da lista no Index = getStudentFiltradoID
+        e adicionamos novo Student vindo de parametro a lista,
+        se nao lança exception*/
+        studentOptional.ifPresentOrElse(student1 -> {
+                    studentConfig.getAllStudents().remove(studentOptional.get());
+                    studentConfig.getAllStudents().add(student);
+                },
+                () -> {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student cant be updated because he does not exist");
+                }
+        );
     }
 
     @DeleteMapping(path = "{id}")
@@ -51,25 +74,6 @@ public class StudentManagementController {
                 studentConfig.getAllStudents()::remove,
                 () -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student does not exist");
-                }
-        );
-    }
-
-    @PutMapping
-    public void updateStudent(@RequestBody Student student) {
-
-        /* Passa pela lista e filtrando Student onde id == getStudentID(), se achar retorna o Student*/
-        Optional<Student> studentOptional = studentConfig.getAllStudents().stream()
-                .filter(student1 -> student1.getStudentID().equals(student.getStudentID()))
-                .findFirst();
-
-        /* Se Student existe entao da um replace na lista no Index = getStudentFiltradoID e adiciona novo Student, se nao lanca exception*/
-        studentOptional.ifPresentOrElse(student1 -> {
-                    studentConfig.getAllStudents().remove(studentOptional.get());
-                    studentConfig.getAllStudents().add(student);
-                },
-                () -> {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student cant be updated because he does not exist");
                 }
         );
     }
