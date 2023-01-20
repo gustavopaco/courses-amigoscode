@@ -1,15 +1,13 @@
 package com.pacoprojects.webmvnsbamigoscodespringsecurity.security;
 
+import com.pacoprojects.webmvnsbamigoscodespringsecurity.auth.ApplicationUserService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.concurrent.TimeUnit;
@@ -20,8 +18,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordConfig passwordConfig;
 
-    public ApplicationSecurityConfig(PasswordConfig passwordConfig) {
+    private final ApplicationUserService applicationUserService;
+
+    public ApplicationSecurityConfig(PasswordConfig passwordConfig, ApplicationUserService applicationUserService) {
         this.passwordConfig = passwordConfig;
+        this.applicationUserService = applicationUserService;
     }
 
     @Override
@@ -82,30 +83,45 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    @Bean
+/*    @Bean
     @Override
     protected UserDetailsService userDetailsService() {
         UserDetails user1 = User.builder()
                 .username("augusto")
                 .password(passwordConfig.passwordEncoder().encode("123"))
-//                .roles(ApplicationUserRole.STUDENT.name()) /* Spring Security vai ler roles como: ROLE_STUDENT */
+//                .roles(ApplicationUserRole.STUDENT.name()) // Spring Security vai ler roles como: ROLE_STUDENT
                 .authorities(ApplicationUserRole.STUDENT.getGrantedAuthorities())
                 .build();
 
         UserDetails user2 = User.builder()
                 .username("gustavo")
                 .password(passwordConfig.passwordEncoder().encode("123"))
-//                .roles(ApplicationUserRole.ADMIN.name()) /* Spring Security vai ler roles como: ROLE_ADMIN */
+//                .roles(ApplicationUserRole.ADMIN.name()) // Spring Security vai ler roles como: ROLE_ADMIN
                 .authorities(ApplicationUserRole.ADMIN.getGrantedAuthorities())
                 .build();
 
         UserDetails user3 = User.builder()
                 .username("tom")
                 .password(passwordConfig.passwordEncoder().encode("123"))
-//                .roles(ApplicationUserRole.ADMIN_TRAINEE.name()) /* Spring Security vai ler roles como: ROLE_ADMIN_TRAINEE */
+//                .roles(ApplicationUserRole.ADMIN_TRAINEE.name()) // Spring Security vai ler roles como: ROLE_ADMIN_TRAINEE
                 .authorities(ApplicationUserRole.ADMIN_TRAINEE.getGrantedAuthorities())
                 .build();
 
         return new InMemoryUserDetailsManager(user1, user2, user3);
+    }*/
+
+    /* METODO DESNECESSARIO posso usar somente o configure(AuthenticationManagerBuilder) exemplo de SOLUCAO comentado abaixo*/
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticatorProvider() {
+        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+        auth.setUserDetailsService(applicationUserService);
+        auth.setPasswordEncoder(passwordConfig.passwordEncoder());
+        return auth;
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticatorProvider());
+//        auth.userDetailsService(applicationUserService).passwordEncoder(passwordConfig.passwordEncoder()); // SOLUCAO
     }
 }
