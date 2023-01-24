@@ -48,7 +48,7 @@ public class UserRequestService {
         String link = "http://localhost:8080/api/v1/full-registration/confirmation?token=" + tokenGerado;
 
         /* Note 1: Envio de Email utilizando AmigosCode interface EmailSender | EmailSenderImpl*/
-        emailSender.send(userRequest.getEmail(), emailBody.buildEmail(userRequest.getFirstName(), link));
+//        emailSender.send(userRequest.getEmail(), emailBody.buildEmail(userRequest.getFirstName(), link));
 
             /* Note 2: Envio de Email utilizando ObjetoJavaGmail.class*/
 //            ArrayList<String> destinatarios = new ArrayList<>();
@@ -70,12 +70,12 @@ public class UserRequestService {
 //                        "Confirm your email",
 //                        null));
         /* Note 4: Envio de email Completo com attachment utilizando Documentacao do Spring Mail*/
-//        emailService.sendMailWithAttachment(
-//                new EmailDetails(
-//                        userRequest.getEmail(),
-//                        emailBody.buildEmail(userRequest.getFirstName(), link),
-//                        "Confirm your email",
-//                        "Y:/Download/relatorio.pdf"));
+        emailService.sendMailWithAttachment(
+                new EmailDetails(
+                        userRequest.getEmail(),
+                        emailBody.buildEmail(userRequest.getFirstName(), link),
+                        "Confirm your email",
+                        "Y:/Download/relatorio.pdf"));
 
         return ResponseEntity.ok(link);
     }
