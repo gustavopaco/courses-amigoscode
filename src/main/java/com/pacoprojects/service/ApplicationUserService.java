@@ -41,11 +41,9 @@ public class ApplicationUserService implements UserDetailsService {
             applicationUser.setPassword(passwordEncoded);
             ApplicationUser userCreated = applicationUserRepository.save(applicationUser);
 
-//        TODO: Send confirmation Token
+//        TODO: Generate and Save Token
             TokenConfirmation generatedToken = tokenConfirmationService.generateToken(userCreated);
             tokenConfirmationService.saveTokenConfirmation(generatedToken);
-
-//        TODO: Send Email
 
             /* Retornando token gerado */
             return generatedToken.getToken();
