@@ -16,12 +16,12 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping(path = "register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterPessoaDto request, HttpServletResponse response) {
         return authenticationService.register(request, response);
     }
 
     @PostMapping(path = "authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationPessoaDto request, HttpServletResponse response) {
         return authenticationService.authenticate(request, response);
     }
 }

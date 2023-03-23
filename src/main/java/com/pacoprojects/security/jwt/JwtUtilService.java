@@ -1,9 +1,7 @@
-package com.pacoprojects.security;
+package com.pacoprojects.security.jwt;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.pacoprojects.model.Pessoa;
-import com.pacoprojects.repository.PessoaRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,10 +9,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.access.AuthorizationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +18,12 @@ import java.time.Period;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class JwtAuthenticationService {
+public class JwtUtilService {
 
     private final JwtConfig jwtConfig;
-    private final PessoaRepository pessoaRepository;
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -47,26 +39,6 @@ public class JwtAuthenticationService {
                 .setExpiration(Date.from(Instant.now().plus(Period.ofDays(jwtConfig.getTokenExpirationAfterDays()))))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public void getAuthentication(HttpServletRequest request) {
-
-        Map<String, Object> objectMap = breakToken(request);
-
-        if (!objectMap.isEmpty()) {
-            String username = objectMap.get("username").toString();
-            String basicToken = objectMap.get("basicToken").toString();
-
-            Optional<Pessoa> pessoaOptional = pessoaRepository.findPessoaByUsername(username);
-
-            if (pessoaOptional.isPresent() && pessoaOptional.get().getJwtBasicToken().equals(basicToken)) {
-                Authentication authentication = new UsernamePasswordAuthenticationToken(username,null,pessoaOptional.get().getAuthorities());
-//                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                throw new AuthorizationServiceException("Usuário não tem permissão para acessar essa página.");
-            }
-        }
     }
 
     public Map<String, Object> breakToken(HttpServletRequest request) {
@@ -86,7 +58,6 @@ public class JwtAuthenticationService {
                 return objectMap;
             }
         }
-
         return objectMap;
     }
 
@@ -105,12 +76,11 @@ public class JwtAuthenticationService {
 
     /*Note: Metodo que extrai um claim especifico*/
     public <T> T extractClaim(String basicToken, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaims(basicToken);
+        final Claims claims = extractAllClaims(basicToken);
         return claimsResolver.apply(claims);
     }
 
-    private Claims getAllClaims(String basicToken) {
-
+    private Claims extractAllClaims(String basicToken) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -121,4 +91,5 @@ public class JwtAuthenticationService {
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
     }
+
 }

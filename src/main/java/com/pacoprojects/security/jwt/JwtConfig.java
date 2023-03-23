@@ -1,4 +1,4 @@
-package com.pacoprojects.security;
+package com.pacoprojects.security.jwt;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.pacoprojects.security;
+package com.pacoprojects.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,6 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            /* Chamando servico que: Quebra o Token | Busca Usuario no Banco | Se usuario existe, seta no contexto do Spring Security*/
             jwtAuthenticationService.getAuthentication(request);
             filterChain.doFilter(request, response);
         } catch (Exception exception) {

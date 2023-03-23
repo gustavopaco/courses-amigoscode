@@ -699,3 +699,4 @@ cython_debug/
 #.idea/
 
 !/package.json
+!/src/main/java/com/pacoprojects/*
