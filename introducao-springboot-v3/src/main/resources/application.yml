@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5332/cliente
-    username: postgres
-    password: admin
+    url: jdbc:postgresql://localhost:5332/DATASOURCE-BD
+    username: BD-USER
+    password: BD-PASSWORD
   jpa:
     hibernate:
       ddl-auto: create-drop
